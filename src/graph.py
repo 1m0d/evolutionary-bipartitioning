@@ -1,5 +1,5 @@
 import random
-from typing import Dict, Literal, Optional, Set
+from typing import Dict, Literal, Set
 
 
 class Node:
@@ -36,9 +36,6 @@ class Graph:
         self.nodes[source].add_neighbor(self.nodes[dest])
         self.nodes[dest].add_neighbor(self.nodes[source])
 
-    def get_node(self, idx: int) -> Optional[Node]:
-        return self.nodes.get(idx)
-
     @classmethod
     def from_file(cls, file_path: str) -> "Graph":
         graph = cls()
@@ -70,3 +67,9 @@ class Graph:
 
         self.crossing_edges = crossing_edges
         return self.crossing_edges
+
+    def set_partitions(self, binary_string: str):
+        for idx, partition in enumerate(binary_string, 1):
+            self.nodes[idx].partition = partition
+
+        self.crossing_edges = 0
