@@ -1,12 +1,14 @@
-import random
-from typing import Dict, Literal, Set
+from typing import Dict, Final, Literal, Set
+import numpy as np
+
+GRAPH_SIZE: Final = 500
 
 
 class Node:
     def __init__(self, idx: int):
         self.idx: int = idx
         self.adjacent: Set[Node] = set()
-        self.partition: Literal["0", "1"] = random.choice(("0", "1"))
+        self.partition: Literal[0, 1]
 
     def add_neighbor(self, neighbor: "Node"):
         self.adjacent.add(neighbor)
@@ -21,7 +23,7 @@ class Node:
 class Graph:
     def __init__(self):
         self.nodes: Dict[int, Node] = {}
-        self.crossing_edges: int
+        self.crossing_edges: int = 0
 
     def add_node(self, idx: int) -> Node:
         node = Node(idx)
@@ -52,24 +54,23 @@ class Graph:
                 for node in data[1:]:
                     graph.add_edge(int(idx), int(node))
 
-        graph.count_crossing_edges()
         return graph
 
     def count_crossing_edges(self) -> int:
         crossing_edges = 0
         for node in self.nodes.values():
-            if node.partition != "0":
+            if node.partition != 0:
                 continue
 
             for adjacent in node.adjacent:
-                if adjacent.partition == "1":
+                if adjacent.partition == 1:
                     crossing_edges += 1
 
         self.crossing_edges = crossing_edges
         return self.crossing_edges
 
-    def set_partitions(self, binary_string: str):
-        for idx, partition in enumerate(binary_string, 1):
+    def set_partitions(self, gene: np.ndarray):
+        for idx, partition in enumerate(gene, 1):
             self.nodes[idx].partition = partition
 
         self.crossing_edges = 0
