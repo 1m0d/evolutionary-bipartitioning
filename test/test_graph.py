@@ -1,6 +1,7 @@
+from os import path
+
 from constants import ROOT_DIR
 from src.graph import Graph
-from os import path
 
 
 def test_from_file():

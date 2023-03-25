@@ -1,5 +1,5 @@
-from typing import Dict, Literal, Optional, Set
 import random
+from typing import Dict, Literal, Optional, Set
 
 
 class Node:
@@ -12,7 +12,10 @@ class Node:
         self.adjacent.add(neighbor)
 
     def __str__(self):
-        return f"[{self.partition}] Node {self.idx}: {[node.idx for node in self.adjacent]}"
+        return (
+            f"[{self.partition}] Node {self.idx}:"
+            f" {[node.idx for node in self.adjacent]}"
+        )
 
 
 class Graph:
