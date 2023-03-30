@@ -17,7 +17,7 @@ graph.count_crossing_edges()
 def fm_pass(graph: Graph):
     left, right, highest_gain_left, highest_gain_right = initialize_buckets(graph)
 
-    
+
 
 
 def initialize_buckets(graph: Graph):
@@ -35,7 +35,7 @@ def initialize_buckets(graph: Graph):
                 internal += 1
             else:
                 external += 1
-        gain = internal - external
+        gain = external - internal
         if node.partition == 0:
             if gain > highest_gain_left:
                 highest_gain_left = gain
