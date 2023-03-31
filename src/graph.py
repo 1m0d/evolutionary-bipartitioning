@@ -9,9 +9,22 @@ class Node:
         self.idx: int = idx
         self.adjacent: Set[Node] = set()
         self.partition: Literal[0, 1]
+        self.gain: int
 
     def add_neighbor(self, neighbor: "Node"):
         self.adjacent.add(neighbor)
+
+    def calculate_gain(self):
+        internal, external = 0, 0 
+
+        for neighbour in self.adjacent:
+            if neighbour.partition == self.partition:
+                internal += 1
+            else:
+                external += 1
+        gain = external - internal
+        self.gain = gain
+        return gain
 
     def __str__(self):
         return (
