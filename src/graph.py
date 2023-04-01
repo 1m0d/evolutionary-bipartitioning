@@ -26,6 +26,9 @@ class Node:
         self.gain = gain
         return gain
 
+    def switch_partition(self): 
+        self.partition =  1 - self.partition
+
     def __str__(self):
         return (
             f"[{self.partition}] Node {self.idx}:"
