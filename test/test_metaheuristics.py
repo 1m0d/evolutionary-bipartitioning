@@ -22,6 +22,7 @@ def test_multi_start_local_search(graph):
     )
 
     assert best_crossing_edges >= 0
+    assert best_crossing_edges == graph.count_crossing_edges()
 
     gene = graph.get_gene()
     assert np.count_nonzero(gene == -1) == 0
@@ -35,6 +36,7 @@ def test_iterated_local_search(graph):
     )
 
     assert best_crossing_edges >= 0
+    assert best_crossing_edges == graph.count_crossing_edges()
 
     gene = graph.get_gene()
     assert np.count_nonzero(gene == -1) == 0
@@ -48,6 +50,7 @@ def test_genetic_local_search(graph):
     )
 
     assert best_crossing_edges >= 0
+    assert best_crossing_edges == graph.count_crossing_edges()
 
     gene = graph.get_gene()
     assert np.count_nonzero(gene == -1) == 0

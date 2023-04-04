@@ -1,7 +1,7 @@
 import numpy as np
 import random
 from src.graph import GRAPH_SIZE, Graph
-from src.FM import fm_pass
+from src.fm import fm_pass
 from src.crossover import uniform_crossover
 from time import perf_counter
 
@@ -14,7 +14,7 @@ def _random_gene() -> np.ndarray:
 
 
 def multi_start_local_search(graph, max_iterations, verbose=False):
-    best_graph = graph
+    best_gene = None
     best_crossing_edges = float("inf")
 
     for _ in range(max_iterations):
@@ -23,12 +23,11 @@ def multi_start_local_search(graph, max_iterations, verbose=False):
         graph.set_partitions(gene=gene)
 
         # Perform the FM algorithm as the local search operator
-        graph = fm_pass(graph, verbose=False)
+        graph, crossing_edges = fm_pass(graph, verbose=False)
 
         # Update the best solution found so far
-        crossing_edges = graph.count_crossing_edges()
         if crossing_edges < best_crossing_edges:
-            best_graph = graph
+            best_gene = graph.get_gene()
             best_crossing_edges = crossing_edges
 
         if verbose:
@@ -39,7 +38,26 @@ def multi_start_local_search(graph, max_iterations, verbose=False):
                 best_crossing_edges,
             )
 
-    return best_graph, best_crossing_edges
+    graph.set_partitions(gene=best_gene)
+    return graph, best_crossing_edges
+
+
+def _invert_bits(gene, perturbation_size):
+    zeros_indices = np.where(gene == 0)[0]
+    ones_indices = np.where(gene == 1)[0]
+
+    # Randomly select indices to invert
+    selected_zeros_indices = np.random.choice(
+        zeros_indices, size=perturbation_size // 2, replace=False
+    )
+    selected_ones_indices = np.random.choice(
+        ones_indices, size=perturbation_size // 2, replace=False
+    )
+
+    # Invert the selected values
+    gene[selected_zeros_indices] = 1
+    gene[selected_ones_indices] = 0
+    return gene
 
 def multi_start_local_search_with_timelimit(graph, time_limit, verbose=False):
     best_graph = graph
@@ -88,17 +106,15 @@ def iterated_local_search(graph, max_iterations, perturbation_factor, verbose=Fa
 
     for _ in range(max_iterations):
         # Perturb the current solution by swapping a random subset of nodes between the partitions
-        nodes_to_swap = np.random.choice(
-            list(graph.nodes.keys()), size=perturbation_size, replace=False
+        inverted_gene = _invert_bits(
+            gene=graph.get_gene(), perturbation_size=perturbation_size
         )
-        for node_index in nodes_to_swap:
-            graph.nodes[node_index].partition = 1 - graph.nodes[node_index].partition
+        graph.set_partitions(gene=inverted_gene)
 
         # Perform local search on the perturbed solution using the FM algorithm
-        perturbed_graph = fm_pass(graph, verbose=False)
+        perturbed_graph, crossing_edges = fm_pass(graph, verbose=False)
 
         # Accept the new solution if it improves the objective function
-        crossing_edges = perturbed_graph.count_crossing_edges()
         if crossing_edges < best_crossing_edges:
             best_graph = perturbed_graph
             best_crossing_edges = crossing_edges
@@ -160,7 +176,7 @@ def genetic_local_search(graph: Graph, population_size: int, max_iterations: int
 
     for i in range(population_size):
         graph.set_partitions(gene=population[i])
-        graph = fm_pass(graph, verbose=False)
+        graph, _ = fm_pass(graph, verbose=False)
         population[i] = graph.get_gene()
 
     for _ in range(max_iterations):
@@ -168,8 +184,7 @@ def genetic_local_search(graph: Graph, population_size: int, max_iterations: int
         child_gene = uniform_crossover(parent1, parent2)
 
         graph.set_partitions(gene=child_gene)
-        optimized_child = fm_pass(graph, verbose=False)
-        child_crossing_edges = optimized_child.count_crossing_edges()
+        optimized_child, child_crossing_edges = fm_pass(graph, verbose=False)
         optimized_child_gene = optimized_child.get_gene()
 
         crossing_edges_list = [
