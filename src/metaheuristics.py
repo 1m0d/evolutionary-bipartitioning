@@ -41,6 +41,24 @@ def multi_start_local_search(graph, max_iterations, verbose=False):
     return best_graph, best_crossing_edges
 
 
+def _invert_bits(gene, perturbation_size):
+    zeros_indices = np.where(gene == 0)[0]
+    ones_indices = np.where(gene == 1)[0]
+
+    # Randomly select indices to invert
+    selected_zeros_indices = np.random.choice(
+        zeros_indices, size=perturbation_size // 2, replace=False
+    )
+    selected_ones_indices = np.random.choice(
+        ones_indices, size=perturbation_size // 2, replace=False
+    )
+
+    # Invert the selected values
+    gene[selected_zeros_indices] = 1
+    gene[selected_ones_indices] = 0
+    return gene
+
+
 def iterated_local_search(graph, max_iterations, perturbation_factor, verbose=False):
     # Generate a random initial solution
     gene = _random_gene()
@@ -53,11 +71,10 @@ def iterated_local_search(graph, max_iterations, perturbation_factor, verbose=Fa
 
     for _ in range(max_iterations):
         # Perturb the current solution by swapping a random subset of nodes between the partitions
-        nodes_to_swap = np.random.choice(
-            list(graph.nodes.keys()), size=perturbation_size, replace=False
+        inverted_gene = _invert_bits(
+            gene=graph.get_gene(), perturbation_size=perturbation_size
         )
-        for node_index in nodes_to_swap:
-            graph.nodes[node_index].partition = 1 - graph.nodes[node_index].partition
+        graph.set_partitions(gene=inverted_gene)
 
         # Perform local search on the perturbed solution using the FM algorithm
         perturbed_graph = fm_pass(graph, verbose=False)
