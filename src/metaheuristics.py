@@ -1,7 +1,7 @@
 import numpy as np
 import random
 from src.graph import GRAPH_SIZE, Graph
-from src.FM import fm_pass
+from src.fm import fm_pass
 from src.crossover import uniform_crossover
 
 
@@ -13,7 +13,7 @@ def _random_gene() -> np.ndarray:
 
 
 def multi_start_local_search(graph, max_iterations, verbose=False):
-    best_graph = graph
+    best_gene = None
     best_crossing_edges = float("inf")
 
     for _ in range(max_iterations):
@@ -22,12 +22,11 @@ def multi_start_local_search(graph, max_iterations, verbose=False):
         graph.set_partitions(gene=gene)
 
         # Perform the FM algorithm as the local search operator
-        graph = fm_pass(graph, verbose=False)
+        graph, crossing_edges = fm_pass(graph, verbose=False)
 
         # Update the best solution found so far
-        crossing_edges = graph.count_crossing_edges()
         if crossing_edges < best_crossing_edges:
-            best_graph = graph
+            best_gene = graph.get_gene()
             best_crossing_edges = crossing_edges
 
         if verbose:
@@ -38,7 +37,8 @@ def multi_start_local_search(graph, max_iterations, verbose=False):
                 best_crossing_edges,
             )
 
-    return best_graph, best_crossing_edges
+    graph.set_partitions(gene=best_gene)
+    return graph, best_crossing_edges
 
 
 def _invert_bits(gene, perturbation_size):
@@ -77,10 +77,9 @@ def iterated_local_search(graph, max_iterations, perturbation_factor, verbose=Fa
         graph.set_partitions(gene=inverted_gene)
 
         # Perform local search on the perturbed solution using the FM algorithm
-        perturbed_graph = fm_pass(graph, verbose=False)
+        perturbed_graph, crossing_edges = fm_pass(graph, verbose=False)
 
         # Accept the new solution if it improves the objective function
-        crossing_edges = perturbed_graph.count_crossing_edges()
         if crossing_edges < best_crossing_edges:
             best_graph = perturbed_graph
             best_crossing_edges = crossing_edges
@@ -99,7 +98,7 @@ def genetic_local_search(graph: Graph, population_size: int, max_iterations: int
 
     for i in range(population_size):
         graph.set_partitions(gene=population[i])
-        graph = fm_pass(graph, verbose=False)
+        graph, _ = fm_pass(graph, verbose=False)
         population[i] = graph.get_gene()
 
     for _ in range(max_iterations):
@@ -107,8 +106,7 @@ def genetic_local_search(graph: Graph, population_size: int, max_iterations: int
         child_gene = uniform_crossover(parent1, parent2)
 
         graph.set_partitions(gene=child_gene)
-        optimized_child = fm_pass(graph, verbose=False)
-        child_crossing_edges = optimized_child.count_crossing_edges()
+        optimized_child, child_crossing_edges = fm_pass(graph, verbose=False)
         optimized_child_gene = optimized_child.get_gene()
 
         crossing_edges_list = [
