@@ -174,7 +174,13 @@ def add_to_bucket(
 
 def roll_back_to_best(graph: Graph, switch_order: List[Tuple[Node, int]]) -> Graph:
     # recover the solution by rolling back all the switches in backwards order until you arrive at best_partition
-    best_iteration = np.argmin([cut[1] for cut in switch_order])
+    order = np.argsort([cut[1] for cut in switch_order])
+    best_iteration = order[0]
+    i = 0
+    while best_iteration % 2 != 0:
+        i += 1
+        best_iteration = order[i]
+
 
     for i in range(len(switch_order) - 1, best_iteration, -1):
         node = switch_order[i][0]
