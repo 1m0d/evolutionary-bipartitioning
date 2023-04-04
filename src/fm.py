@@ -4,28 +4,31 @@ from src.graph import GRAPH_SIZE
 class GainBuckets:
     def __init__(self):
         self.buckets = {}
+        self.max_gain = float("-inf")
 
     def insert(self, gain, node):
         if gain in self.buckets:
             self.buckets[gain].add(node)
         else:
             self.buckets[gain] = {node}
+            if gain > self.max_gain:
+                self.max_gain = gain
 
     def delete(self, gain, node):
         self.buckets[gain].remove(node)
         if not self.buckets[gain]:
             del self.buckets[gain]
 
-    def get_max_gain(self):
-        max_gain = max(self.buckets.keys())
-        return max_gain
+            if gain == self.max_gain:
+                self.max_gain = max(self.buckets.keys(), default=float("-inf"))
 
     def pop_node_with_max_gain(self):
-        max_gain = self.get_max_gain()
-        node = self.buckets[max_gain].pop()
-        if not self.buckets[max_gain]:
-            del self.buckets[max_gain]
-        return node, max_gain
+        node = self.buckets[self.max_gain].pop()
+        current_max_gain = self.max_gain
+        if not self.buckets[self.max_gain]:
+            del self.buckets[self.max_gain]
+            self.max_gain = max(self.buckets.keys(), default=float("-inf"))
+        return node, current_max_gain
 
 
 def fm_pass(graph, verbose=False):
