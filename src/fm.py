@@ -65,7 +65,9 @@ def fm_pass(graph, verbose=False):
                 continue
 
             old_gain = neighbor.gain
-            new_gain = neighbor.gain = old_gain - 2 * max_gain
+            new_gain = neighbor.gain = (
+                old_gain - 2 if neighbor.partition == node.partition else old_gain + 2
+            )
 
             # Update the gain buckets
             if neighbor.partition == 0:
@@ -78,5 +80,8 @@ def fm_pass(graph, verbose=False):
     # Rollback to the best graph
     for i in range(GRAPH_SIZE - 1, best_move_index, -1):
         move_history[i].switch_partition()
+
+    for node in graph.nodes.values():
+        node.switched = False
 
     return graph
