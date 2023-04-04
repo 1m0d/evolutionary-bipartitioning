@@ -35,6 +35,7 @@ def fm_pass(graph, verbose=False):
 
     # Calculate initial gains and populate gain buckets
     for node in graph.nodes.values():
+        node.switched = False
         gain = node.calculate_gain()
         if node.partition == 0:
             gain_buckets_0.insert(gain, node)
@@ -81,7 +82,4 @@ def fm_pass(graph, verbose=False):
     for i in range(GRAPH_SIZE - 1, best_move_index, -1):
         move_history[i].switch_partition()
 
-    for node in graph.nodes.values():
-        node.switched = False
-
-    return graph
+    return graph, best_crossing_edges
