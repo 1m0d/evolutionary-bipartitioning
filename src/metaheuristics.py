@@ -1,4 +1,5 @@
 import numpy as np
+import random
 from src.graph import GRAPH_SIZE, Graph
 from src.FM import fm_pass
 from src.crossover import uniform_crossover
@@ -11,11 +12,11 @@ def _random_gene() -> np.ndarray:
     return gene
 
 
-def multi_start_local_search(graph, num_starts, verbose=False):
-    best_graph = None
+def multi_start_local_search(graph, max_iterations, verbose=False):
+    best_graph = graph
     best_crossing_edges = float("inf")
 
-    for _ in range(num_starts):
+    for _ in range(max_iterations):
         # Generate a random initial solution
         gene = _random_gene()
         graph.set_partitions(gene=gene)
@@ -85,7 +86,7 @@ def genetic_local_search(graph: Graph, population_size: int, max_iterations: int
         population[i] = graph.get_gene()
 
     for _ in range(max_iterations):
-        parent1, parent2 = np.random.choice(population, size=2, replace=False)
+        parent1, parent2 = random.sample(population, 2)
         child_gene = uniform_crossover(parent1, parent2)
 
         graph.set_partitions(gene=child_gene)
