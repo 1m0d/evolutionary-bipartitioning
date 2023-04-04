@@ -93,7 +93,7 @@ class Graph:
         return self
 
     def get_gene(self) -> np.ndarray:
-        gene = np.array(GRAPH_SIZE)
+        gene = np.full(GRAPH_SIZE, -1)
         for idx in range(GRAPH_SIZE):
             gene[idx] = self.nodes[idx + 1].partition
 
