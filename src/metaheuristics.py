@@ -1,7 +1,7 @@
 import numpy as np
 import random
 from src.graph import GRAPH_SIZE, Graph
-from src.FM import fm_pass
+from src.fm import fm_pass
 from src.crossover import uniform_crossover
 
 

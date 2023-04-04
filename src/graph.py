@@ -10,6 +10,7 @@ class Node:
         self.adjacent: Set[Node] = set()
         self.partition: Literal[0, 1]
         self.gain: int
+        self.switched = False
 
     def add_neighbor(self, neighbor: "Node"):
         self.adjacent.add(neighbor)
@@ -28,6 +29,7 @@ class Node:
 
     def switch_partition(self):
         self.partition = 1 - self.partition
+        self.switched = True
 
     def __str__(self):
         return (
