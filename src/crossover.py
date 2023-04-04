@@ -1,6 +1,6 @@
 import numpy as np
 
-from graph import GRAPH_SIZE
+from src.graph import GRAPH_SIZE
 
 
 def child_generator(number_of_0_needed):
@@ -13,14 +13,14 @@ def child_generator(number_of_0_needed):
         count += 1
 
 
-def uniform_crossover(parent1: np.ndarray, parent2: np.ndarray):
+def uniform_crossover(parent1: np.ndarray, parent2: np.ndarray) -> np.ndarray:
     hamming_distance = np.average(parent1 != parent2)
 
     if hamming_distance > GRAPH_SIZE / 2:
         parent1 = np.invert(parent1)
 
     empty_positions = []
-    child = np.array(GRAPH_SIZE)
+    child = np.full(GRAPH_SIZE, -1)
     for i in range(GRAPH_SIZE):
         if parent1[i] == parent2[i]:
             child[i] = parent1[i]
@@ -37,3 +37,5 @@ def uniform_crossover(parent1: np.ndarray, parent2: np.ndarray):
     np.random.shuffle(empty_positions)
     for empty_index in empty_positions:
         child[empty_index] = next(child_gen)
+
+    return child
