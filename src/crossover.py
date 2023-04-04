@@ -13,7 +13,7 @@ def child_generator(number_of_0_needed):
         count += 1
 
 
-def uniform_crossover(parent1: np.ndarray, parent2: np.ndarray):
+def uniform_crossover(parent1: np.ndarray, parent2: np.ndarray) -> np.ndarray:
     hamming_distance = np.average(parent1 != parent2)
 
     if hamming_distance > GRAPH_SIZE / 2:
@@ -37,3 +37,5 @@ def uniform_crossover(parent1: np.ndarray, parent2: np.ndarray):
     np.random.shuffle(empty_positions)
     for empty_index in empty_positions:
         child[empty_index] = next(child_gen)
+
+    return child

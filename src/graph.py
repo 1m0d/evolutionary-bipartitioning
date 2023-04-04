@@ -15,7 +15,7 @@ class Node:
         self.adjacent.add(neighbor)
 
     def calculate_gain(self):
-        internal, external = 0, 0 
+        internal, external = 0, 0
 
         for neighbour in self.adjacent:
             if neighbour.partition == self.partition:
@@ -26,8 +26,8 @@ class Node:
         self.gain = gain
         return gain
 
-    def switch_partition(self): 
-        self.partition =  1 - self.partition
+    def switch_partition(self):
+        self.partition = 1 - self.partition
 
     def __str__(self):
         return (
@@ -85,8 +85,16 @@ class Graph:
         self.crossing_edges = crossing_edges
         return self.crossing_edges
 
-    def set_partitions(self, gene: np.ndarray):
+    def set_partitions(self, gene: np.ndarray) -> "Graph":
         for idx, partition in enumerate(gene, 1):
             self.nodes[idx].partition = partition
 
         self.crossing_edges = 0
+        return self
+
+    def get_gene(self) -> np.ndarray:
+        gene = np.array(GRAPH_SIZE)
+        for idx in range(GRAPH_SIZE):
+            gene[idx] = self.nodes[idx + 1].partition
+
+        return gene
