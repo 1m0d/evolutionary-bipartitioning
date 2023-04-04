@@ -5,6 +5,7 @@ from src.metaheuristics import (
     genetic_local_search,
     iterated_local_search,
     multi_start_local_search,
+    multi_start_local_search_with_timelimit
 )
 from src.graph import Graph
 import numpy as np
@@ -55,3 +56,8 @@ def test_genetic_local_search(graph):
     assert np.count_nonzero(gene == -1) == 0
     assert np.count_nonzero(gene == 0) == 250
     assert np.count_nonzero(gene == 1) == 250
+
+def test_multi_start_local_search_with_timelimit(graph):
+       graph, best_crossing_edges = multi_start_local_search_with_timelimit(
+        graph=graph, max_iterations=50000, time_limit=5
+    )
