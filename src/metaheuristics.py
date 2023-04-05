@@ -59,6 +59,7 @@ def _invert_bits(gene, perturbation_size):
     gene[selected_ones_indices] = 0
     return gene
 
+
 def multi_start_local_search_with_timelimit(graph, time_limit, verbose=False):
     best_gene = None
     best_crossing_edges = float("inf")
@@ -104,6 +105,7 @@ def iterated_local_search(graph, max_iterations, perturbation_factor, verbose=Fa
     best_crossing_edges = graph.count_crossing_edges()
 
     perturbation_size = int(perturbation_factor * GRAPH_SIZE)
+    local_optimum_same = 0
 
     for _ in range(max_iterations):
         # Perturb the current solution by swapping a random subset of nodes between the partitions
@@ -119,6 +121,8 @@ def iterated_local_search(graph, max_iterations, perturbation_factor, verbose=Fa
         if crossing_edges < best_crossing_edges:
             best_graph = perturbed_graph
             best_crossing_edges = crossing_edges
+        else:
+            local_optimum_same += 1
 
         if verbose:
             print(crossing_edges, best_crossing_edges)
@@ -128,7 +132,10 @@ def iterated_local_search(graph, max_iterations, perturbation_factor, verbose=Fa
 
     return best_graph, best_crossing_edges
 
-def iterated_local_search_with_timelimit(graph, perturbation_factor, time_limit, verbose=False):
+
+def iterated_local_search_with_timelimit(
+    graph, perturbation_factor, time_limit, verbose=False
+):
     # Generate a random initial solution
     gene = _random_gene()
     graph.set_partitions(gene=gene)
@@ -204,6 +211,7 @@ def genetic_local_search(graph: Graph, population_size: int, max_iterations: int
 
     return graph, best_crossing_edges
 
+
 def genetic_local_search_with_timelimit(graph: Graph, population_size: int, time_limit):
     population = [_random_gene() for _ in range(population_size)]
 
@@ -234,7 +242,7 @@ def genetic_local_search_with_timelimit(graph: Graph, population_size: int, time
 
         if child_crossing_edges <= worst_crossing_edges:
             population[worst_index] = optimized_child_gene
-        
+
         time = perf_counter()
 
     best_index = np.argmin(
@@ -243,6 +251,5 @@ def genetic_local_search_with_timelimit(graph: Graph, population_size: int, time
     best_gene = population[best_index]
     graph.set_partitions(gene=best_gene)
     best_crossing_edges = graph.count_crossing_edges()
-
 
     return graph, best_crossing_edges
