@@ -60,25 +60,26 @@ def _invert_bits(gene, perturbation_size):
     return gene
 
 def multi_start_local_search_with_timelimit(graph, time_limit, verbose=False):
-    best_graph = graph
+    best_gene = None
     best_crossing_edges = float("inf")
+
     start = perf_counter()
     time = start
-
+    # for _ in range(max_iterations):
     while True:
         if time > start + time_limit:
             break
+
         # Generate a random initial solution
         gene = _random_gene()
         graph.set_partitions(gene=gene)
 
         # Perform the FM algorithm as the local search operator
-        graph = fm_pass(graph, verbose=False)
+        graph, crossing_edges = fm_pass(graph, verbose=False)
 
         # Update the best solution found so far
-        crossing_edges = graph.count_crossing_edges()
         if crossing_edges < best_crossing_edges:
-            best_graph = graph
+            best_gene = graph.get_gene()
             best_crossing_edges = crossing_edges
 
         if verbose:
@@ -88,10 +89,10 @@ def multi_start_local_search_with_timelimit(graph, time_limit, verbose=False):
                 "best_crossing_edges:",
                 best_crossing_edges,
             )
-
         time = perf_counter()
 
-    return best_graph, best_crossing_edges
+    graph.set_partitions(gene=best_gene)
+    return graph, best_crossing_edges
 
 
 def iterated_local_search(graph, max_iterations, perturbation_factor, verbose=False):
@@ -139,23 +140,21 @@ def iterated_local_search_with_timelimit(graph, perturbation_factor, time_limit,
 
     start = perf_counter()
     time = start
-
+    # for _ in range(max_iterations):
     while True:
         if time > start + time_limit:
             break
-         
+
         # Perturb the current solution by swapping a random subset of nodes between the partitions
-        nodes_to_swap = np.random.choice(
-            list(graph.nodes.keys()), size=perturbation_size, replace=False
+        inverted_gene = _invert_bits(
+            gene=graph.get_gene(), perturbation_size=perturbation_size
         )
-        for node_index in nodes_to_swap:
-            graph.nodes[node_index].partition = 1 - graph.nodes[node_index].partition
+        graph.set_partitions(gene=inverted_gene)
 
         # Perform local search on the perturbed solution using the FM algorithm
-        perturbed_graph = fm_pass(graph, verbose=False)
+        perturbed_graph, crossing_edges = fm_pass(graph, verbose=False)
 
         # Accept the new solution if it improves the objective function
-        crossing_edges = perturbed_graph.count_crossing_edges()
         if crossing_edges < best_crossing_edges:
             best_graph = perturbed_graph
             best_crossing_edges = crossing_edges
@@ -210,12 +209,12 @@ def genetic_local_search_with_timelimit(graph: Graph, population_size: int, time
 
     for i in range(population_size):
         graph.set_partitions(gene=population[i])
-        graph = fm_pass(graph, verbose=False)
+        graph, _ = fm_pass(graph, verbose=False)
         population[i] = graph.get_gene()
 
     start = perf_counter()
     time = start
-
+    # for _ in range(max_iterations):
     while True:
         if time > start + time_limit:
             break
@@ -224,8 +223,7 @@ def genetic_local_search_with_timelimit(graph: Graph, population_size: int, time
         child_gene = uniform_crossover(parent1, parent2)
 
         graph.set_partitions(gene=child_gene)
-        optimized_child = fm_pass(graph, verbose=False)
-        child_crossing_edges = optimized_child.count_crossing_edges()
+        optimized_child, child_crossing_edges = fm_pass(graph, verbose=False)
         optimized_child_gene = optimized_child.get_gene()
 
         crossing_edges_list = [
@@ -236,9 +234,9 @@ def genetic_local_search_with_timelimit(graph: Graph, population_size: int, time
 
         if child_crossing_edges <= worst_crossing_edges:
             population[worst_index] = optimized_child_gene
-
-        time = perf_counter()   
         
+        time = perf_counter()
+
     best_index = np.argmin(
         [graph.set_partitions(gene=g).count_crossing_edges() for g in population]
     )
