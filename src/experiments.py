@@ -7,7 +7,7 @@ import numpy as np
 from scipy.stats import mannwhitneyu
 import matplotlib.pyplot as plt
 
-FM_PASSES = 10
+FM_PASSES = 10_000
 RERUNS = 20
 GRAPH = Graph.from_file(path.join(ROOT_DIR, "graph.txt"))
 
@@ -31,6 +31,19 @@ def experiment_one():
     print(f"{p_mls_ils=} p-value")
     print(f"{p_mls_gls=} p-value")
     print(f"{p_ils_gls=} p-value")
+
+    fig, axs = plt.subplots(1, 3)
+    ymin, ymax = min(min(MLS_results), min(ILS_results), min(GLS_results)), max(max(MLS_results), max(ILS_results), max(GLS_results))
+    for ax in axs:
+        ax.set_ylim([ymin, ymax])
+    axs[0].boxplot(MLS_results)
+    axs[0].set_title("MLS result")
+
+    axs[1].boxplot(ILS_results)
+    axs[1].set_title("ILS result")
+    axs[2].boxplot(GLS_results)
+    axs[2].set_title("GLS result")
+    plt.savefig("experiment1.png")
 
     return MLS_results, ILS_results, GLS_results
 
@@ -61,11 +74,8 @@ def experiment_four(MLS_result, ILS_result):
         pvalues_mls_gls.append(p_mls)
         pvalues_ils_gls.append(p_ils)
 
-    # for pval in pvalues_mls_gls:
-    #     print(f"{pval=} p-value")
-
-    fig, axs = plt.subplots(1, 5)
-    ymin, ymax = min([gls_global_results[i] for i in range(6)]), max([gls_global_results[i] for i in range(6)])
+    fig, axs = plt.subplots(1, 6)
+    ymin, ymax = min([gls_global_results[i].any() for i in range(6)]), max([gls_global_results[i].any() for i in range(6)])
     for ax in axs:
         ax.set_ylim([ymin, ymax])
     axs[0].boxplot(gls_global_results[0])
@@ -115,30 +125,7 @@ def experiment_four_two():
     axs[1].set_title("ILS result")
     axs[2].boxplot(GLS_results)
     axs[2].set_title("GLS result")
-    plt.show()
-
-
-
-
-
-
-    
-
-
-
-# fig, axs = plt.subplots(1, 3)
-# ymin, ymax = min(min(MLS_results), min(ILS_results), min(GLS_results)), max(max(MLS_results), max(ILS_results), max(GLS_results))
-# for ax in axs:
-#     ax.set_ylim([ymin, ymax])
-# axs[0].boxplot(MLS_results)
-# axs[0].set_title("MLS result")
-
-# axs[1].boxplot(ILS_results)
-# axs[1].set_title("ILS result")
-# axs[2].boxplot(GLS_results)
-# axs[2].set_title("GLS result")
-# plt.show()
-
+    plt.savefig("experiment4b.png")
 
 def run_algorithm(algorithm, graph, perturbation_factor=0, population_size=50):
     if algorithm == "MLS":
@@ -177,7 +164,8 @@ def run_algorithm(algorithm, graph, perturbation_factor=0, population_size=50):
             GLS_results[i] = result_GLS_cutsize
         return GLS_times, GLS_results
 
-# MLS_results, ILS_results, GLS_results = experiment_one()
+MLS_results, ILS_results, GLS_results = experiment_one()
 experiment_four_two()
+experiment_four(MLS_results, ILS_results)
 
 
